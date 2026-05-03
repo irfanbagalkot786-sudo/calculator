@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMI Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f4f3ff;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 30px 16px;
+    }
+
+    .root {
+      width: 100%;
+      max-width: 860px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: #534AB7;
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: #CECBF6;
+      margin-top: 2px;
+    }
+
+    .emi-badge {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 20px;
+      text-align: center;
+      min-width: 160px;
+    }
+
+    .emi-badge-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #534AB7;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .emi-badge-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: #3C3489;
+      margin-top: 2px;
+    }
+
+    /* ── BODY GRID ── */
+    .body-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid #CECBF6;
+      border-radius: 14px;
+      padding: 1.4rem;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #534AB7;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.1rem;
+    }
+
+    /* ── FIELDS ── */
+    .field {
+      margin-bottom: 1.2rem;
+    }
+
+    .field-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+
+    .field-label {
+      font-size: 13px;
+      color: #444441;
+    }
+
+    .field-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #534AB7;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #534AB7;
+      cursor: pointer;
+    }
+
+    .num-in {
+      width: 100%;
+      margin-top: 7px;
+      padding: 7px 11px;
+      border: 1px solid #CECBF6;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #2C2C2A;
+      background: #EEEDFE;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .num-in:focus {
+      border-color: #534AB7;
+      box-shadow: 0 0 0 3px #534AB744;
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 1.1rem;
+    }
+
+    .stat {
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+    }
+
+    .stat.blue   { background: #EEEDFE; border: 1px solid #AFA9EC; }
+    .stat.teal   { background: #E1F5EE; border: 1px solid #9FE1CB; }
+    .stat.coral  { background: #FAECE7; border: 1px solid #F5C4B3; }
+    .stat.amber  { background: #FAEEDA; border: 1px solid #FAC775; }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat.blue  .stat-label { color: #534AB7; }
+    .stat.teal  .stat-label { color: #0F6E56; }
+    .stat.coral .stat-label { color: #993C1D; }
+    .stat.amber .stat-label { color: #854F0B; }
+
+    .stat-val {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .stat.blue  .stat-val { color: #3C3489; }
+    .stat.teal  .stat-val { color: #085041; }
+    .stat.coral .stat-val { color: #712B13; }
+    .stat.amber .stat-val { color: #633806; }
+
+    /* ── PROGRESS BAR ── */
+    .bar-wrap {
+      margin-bottom: 0.5rem;
+    }
+
+    .bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 5px;
+      background: #EEEDFE;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: #534AB7;
+      transition: width 0.35s ease;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .donut-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 0.5rem 0;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.6rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #444441;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 3px;
+    }
+
+    .insight {
+      background: #EEEDFE;
+      border: 1px solid #AFA9EC;
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      margin-top: 1rem;
+      font-size: 12px;
+      color: #3C3489;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── AMORTIZATION TABLE ── */
+    .table-section {
+      margin-top: 1.25rem;
+      background: #fff;
+      border: 1px solid #CECBF6;
+      border-radius: 14px;
+      padding: 1.4rem;
+    }
+
+    .table-section .panel-title {
+      margin-bottom: 1rem;
+    }
+
+    .amort-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .amort-table thead th {
+      background: #534AB7;
+      color: #fff;
+      padding: 9px 12px;
+      text-align: right;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+    }
+
+    .amort-table thead th:first-child {
+      text-align: left;
+      border-radius: 8px 0 0 0;
+    }
+
+    .amort-table thead th:last-child {
+      border-radius: 0 8px 0 0;
+    }
+
+    .amort-table tbody tr {
+      border-bottom: 1px solid #EEEDFE;
+      transition: background 0.15s;
+    }
+
+    .amort-table tbody tr:hover {
+      background: #f4f3ff;
+    }
+
+    .amort-table tbody td {
+      padding: 8px 12px;
+      text-align: right;
+      color: #2C2C2A;
+    }
+
+    .amort-table tbody td:first-child {
+      text-align: left;
+      color: #534AB7;
+      font-weight: 600;
+    }
+
+    .amort-table tbody tr:last-child td {
+      color: #3C3489;
+      font-weight: 700;
+      background: #EEEDFE;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 580px) {
+      .body-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-title {
+        font-size: 20px;
+      }
+
+      .emi-badge {
+        width: 100%;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .amort-table {
+        font-size: 11px;
+      }
+
+      .amort-table thead th,
+      .amort-table tbody td {
+        padding: 7px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="root">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <div class="header-title">EMI Calculator</div>
+        <div class="header-sub">Equated Monthly Installment</div>
+      </div>
+      <div class="emi-badge">
+        <div class="emi-badge-label">Monthly EMI</div>
+        <div class="emi-badge-val" id="emi-top">₹0</div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body-grid">
+
+      <!-- LEFT: CONTROLS -->
+      <div class="panel">
+        <div class="panel-title">Loan details</div>
+
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Loan amount</span>
+            <span class="field-val" id="lv">₹3,10,000</span>
+          </div>
+          <input type="range" id="lr" min="1000" max="5000000" step="1000" value="310000" />
+          <input class="num-in" type="number" id="li" min="1000" step="1000" value="310000" placeholder="Enter amount" />
+        </div>
+
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Annual interest rate</span>
+            <span class="field-val" id="rv">7.5%</span>
+          </div>
+          <input type="range" id="rr" min="1" max="20" step="0.1" value="7.5" />
+        </div>
+
+        <div class="field">
+          <div class="field-top">
+            <span class="field-label">Loan tenor</span>
+            <span class="field-val" id="tv">5 yrs / 60 mo</span>
+          </div>
+          <input type="range" id="tr" min="1" max="30" step="1" value="5" />
+          <input class="num-in" type="number" id="tm" min="1" max="360" step="1" value="60" placeholder="Enter months" />
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat blue">
+            <div class="stat-label">Monthly EMI</div>
+            <div class="stat-val" id="s-emi">₹0</div>
+          </div>
+          <div class="stat teal">
+            <div class="stat-label">Total payment</div>
+            <div class="stat-val" id="s-tp">₹0</div>
+          </div>
+          <div class="stat coral">
+            <div class="stat-label">Total interest</div>
+            <div class="stat-val" id="s-ti">₹0</div>
+          </div>
+          <div class="stat amber">
+            <div class="stat-label">Principal</div>
+            <div class="stat-val" id="s-pp">₹0</div>
+          </div>
+        </div>
+
+        <div class="bar-wrap">
+          <div class="bar-label-row">
+            <span id="pct-p" style="color:#534AB7;">Principal 0%</span>
+            <span id="pct-i" style="color:#D85A30;">Interest 0%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" id="bar" style="width:50%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CHART -->
+      <div class="panel">
+        <div class="panel-title">Payment breakdown</div>
+        <div class="donut-wrap">
+          <canvas id="pie" width="210" height="210"></canvas>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#534AB7;"></div>Principal
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#D85A30;"></div>Interest
+          </div>
+        </div>
+        <div class="insight" id="insight">—</div>
+      </div>
+
+    </div>
+
+    <!-- AMORTIZATION TABLE -->
+    <div class="table-section">
+      <div class="panel-title">Yearly amortization schedule</div>
+      <div style="overflow-x:auto;">
+        <table class="amort-table">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Principal paid</th>
+              <th>Interest paid</th>
+              <th>Total paid</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody id="amort-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ── HELPERS ── */
+    function fmt(n) {
+      return '₹' + Math.round(n).toLocaleString('en-IN');
+    }
+
+    /* ── ELEMENTS ── */
+    const lr = document.getElementById('lr');
+    const li = document.getElementById('li');
+    const lv = document.getElementById('lv');
+    const rr = document.getElementById('rr');
+    const rv = document.getElementById('rv');
+    const tr = document.getElementById('tr');
+    const tv = document.getElementById('tv');
+    const tm = document.getElementById('tm');
+    const sEmi = document.getElementById('s-emi');
+    const sTp  = document.getElementById('s-tp');
+    const sTi  = document.getElementById('s-ti');
+    const sPp  = document.getElementById('s-pp');
+    const emiTop  = document.getElementById('emi-top');
+    const barEl   = document.getElementById('bar');
+    const pctP    = document.getElementById('pct-p');
+    const pctI    = document.getElementById('pct-i');
+    const insight = document.getElementById('insight');
+    const pie     = document.getElementById('pie');
+    const ctx     = pie.getContext('2d');
+    const amortBody = document.getElementById('amort-body');
+
+    /* ── CALCULATION ── */
+    function calcEMI(P, ann, n) {
+      const r = ann / 12 / 100;
+      if (r === 0) return { emi: P / n, total: P, interest: 0 };
+      const pow = Math.pow(1 + r, n);
+      const emi = P * r * pow / (pow - 1);
+      const total = emi * n;
+      return { emi, total, interest: total - P };
+    }
+
+    /* ── DONUT CHART ── */
+    function drawDonut(P, I) {
+      const total = P + I;
+      const cx = 105, cy = 105, r = 88, cut = 50;
+      ctx.clearRect(0, 0, 210, 210);
+
+      const slices = [
+        [P, '#534AB7'],
+        [I, '#D85A30']
+      ];
+      let start = -Math.PI / 2;
+      slices.forEach(([val, color]) => {
+        const angle = (val / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, start, start + angle);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        start += angle;
+      });
+
+      /* donut hole */
+      ctx.beginPath();
+      ctx.arc(cx, cy, cut, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      /* center text */
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#534AB7';
+      ctx.font = '600 12px Segoe UI, sans-serif';
+      ctx.fillText('Total', cx, cy - 7);
+      ctx.fillStyle = '#085041';
+      ctx.font = '700 14px Segoe UI, sans-serif';
+      ctx.fillText(fmt(total), cx, cy + 11);
+    }
+
+    /* ── AMORTIZATION TABLE ── */
+    function buildAmortTable(P, annualRate, totalMonths) {
+      const r = annualRate / 12 / 100;
+      const pow = Math.pow(1 + r, totalMonths);
+      const emi = r === 0 ? P / totalMonths : P * r * pow / (pow - 1);
+
+      let balance = P;
+      const yearData = {};
+
+      for (let m = 1; m <= totalMonths; m++) {
+        const intPart = balance * r;
+        const prinPart = emi - intPart;
+        balance = Math.max(0, balance - prinPart);
+        const yr = Math.ceil(m / 12);
+        if (!yearData[yr]) yearData[yr] = { prin: 0, int: 0, paid: 0 };
+        yearData[yr].prin += prinPart;
+        yearData[yr].int  += intPart;
+        yearData[yr].paid += emi;
+        yearData[yr].bal   = balance;
+      }
+
+      amortBody.innerHTML = '';
+      let totPrin = 0, totInt = 0, totPaid = 0;
+
+      Object.keys(yearData).forEach(yr => {
+        const d = yearData[yr];
+        totPrin += d.prin; totInt += d.int; totPaid += d.paid;
+        const row = document.createElement('tr');
+        row.innerHTML =
+          '<td>Year ' + yr + '</td>' +
+          '<td>' + fmt(d.prin) + '</td>' +
+          '<td>' + fmt(d.int)  + '</td>' +
+          '<td>' + fmt(d.paid) + '</td>' +
+          '<td>' + fmt(d.bal)  + '</td>';
+        amortBody.appendChild(row);
+      });
+
+      /* total row */
+      const tot = document.createElement('tr');
+      tot.innerHTML =
+        '<td>Total</td>' +
+        '<td>' + fmt(totPrin) + '</td>' +
+        '<td>' + fmt(totInt)  + '</td>' +
+        '<td>' + fmt(totPaid) + '</td>' +
+        '<td>₹0</td>';
+      amortBody.appendChild(tot);
+    }
+
+    /* ── MAIN UPDATE ── */
+    function update() {
+      const P   = +lr.value;
+      const ann = +rr.value;
+      const n   = +tm.value;
+      const { emi, total, interest } = calcEMI(P, ann, n);
+
+      emiTop.textContent = fmt(emi);
+      sEmi.textContent   = fmt(emi);
+      sTp.textContent    = fmt(total);
+      sTi.textContent    = fmt(interest);
+      sPp.textContent    = fmt(P);
+
+      const pPct = Math.round(P / total * 100);
+      const iPct = 100 - pPct;
+      barEl.style.width = pPct + '%';
+      pctP.textContent  = 'Principal ' + pPct + '%';
+      pctI.textContent  = 'Interest '  + iPct + '%';
+
+      const extra = Math.round(interest / P * 100000);
+      insight.textContent =
+        'For every ₹1 lakh borrowed, you pay ' + fmt(extra) + ' extra as interest';
+
+      drawDonut(P, interest);
+      buildAmortTable(P, ann, n);
+    }
+
+    /* ── SYNC INPUTS ── */
+    lr.addEventListener('input', () => {
+      li.value = lr.value;
+      lv.textContent = fmt(lr.value);
+      update();
+    });
+
+    li.addEventListener('change', () => {
+      let v = Math.min(Math.max(+li.value || 1000, 1000), 5000000);
+      li.value = v;
+      lr.value = v;
+      lv.textContent = fmt(v);
+      update();
+    });
+
+    rr.addEventListener('input', () => {
+      rv.textContent = (+rr.value).toFixed(1) + '%';
+      update();
+    });
+
+    tr.addEventListener('input', () => {
+      const m = +tr.value * 12;
+      tm.value = m;
+      tv.textContent = tr.value + ' yrs / ' + m + ' mo';
+      update();
+    });
+
+    tm.addEventListener('change', () => {
+      const m = Math.min(Math.max(+tm.value || 1, 1), 360);
+      tm.value = m;
+      const y = Math.max(1, Math.round(m / 12));
+      tr.value = y;
+      tv.textContent = y + ' yrs / ' + m + ' mo';
+      update();
+    });
+
+    /* ── INIT ── */
+    lv.textContent = fmt(lr.value);
+    rv.textContent = (+rr.value).toFixed(1) + '%';
+    tv.textContent = tr.value + ' yrs / ' + tm.value + ' mo';
+    update();
+  </script>
+</body>
+</html>
